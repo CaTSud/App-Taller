@@ -22,7 +22,7 @@ export const useFcmToken = () => {
 
                     if (permissionResult === 'granted') {
                         const currentToken = await getToken(messaging, {
-                            vapidKey: 'YOUR_VAPID_KEY_HERE' // Optional, but recommended to add if you have one
+                            vapidKey: 'BIy9dYR5mPVG4v0ZFP4fGASwUTnRX6yl_jPxFV6WTrsUZh3zSRqAeBMkjpV1dpbp4sd4HXEByfYS9O1e0XVGdqc' // Optional, but recommended to add if you have one
                         });
 
                         if (currentToken) {
