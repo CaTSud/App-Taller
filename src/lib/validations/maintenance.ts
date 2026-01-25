@@ -6,7 +6,6 @@ export const maintenanceLogSchema = z.object({
     kmAtService: z.number().int().positive('Los kilómetros deben ser positivos'),
     category: z.string().min(1, 'La categoría es obligatoria'),
     description: z.string().optional(),
-    cost: z.number().positive().optional(),
     interventionTypeName: z.string().optional(),
 });
 
@@ -16,7 +15,6 @@ export const fleetLegalStatusSchema = z.object({
     next_itv_date: z.string().nullable(),
     next_tacho_date: z.string().nullable(),
     next_atp_date: z.string().nullable(),
-    insurance_expiry: z.string().nullable(),
 });
 
 // Infer types from schemas

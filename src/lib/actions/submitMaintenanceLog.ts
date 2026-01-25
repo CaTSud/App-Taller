@@ -11,9 +11,7 @@ interface MaintenanceLogData {
     kmAtService: number;
     category: MaintenanceCategory;
     description: string;
-    cost?: number;
     tirePosition?: string; // Comma separated
-    tireAction?: string;
     newExpiryDate?: string;
     attachmentUrl?: string;
     interventionTypeName?: string;
@@ -41,7 +39,6 @@ export async function submitMaintenanceLog(
             kmAtService: data.kmAtService,
             category: data.category,
             description: data.description,
-            cost: data.cost,
             interventionTypeName: data.interventionTypeName,
         });
 
@@ -100,9 +97,7 @@ export async function submitMaintenanceLog(
             category: data.category,
             description: data.description,
             attachment_url: data.attachmentUrl || null,
-            cost: data.cost || null,
             tire_position: data.tirePosition || null,
-            tire_action: data.tireAction || null,
             intervention_type_id: interventionTypeId,
         };
 
@@ -203,8 +198,6 @@ async function updateLegalStatus(
         updateField = 'next_tacho_date';
     } else if (searchString.includes('atp') || searchString.includes('frigo')) {
         updateField = 'next_atp_date';
-    } else if (searchString.includes('seguro') || searchString.includes('insurance')) {
-        updateField = 'insurance_expiry';
     }
 
     if (!updateField) return;

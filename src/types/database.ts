@@ -54,7 +54,6 @@ export interface FleetLegalStatus {
   next_itv_date: string | null;      // Next ITV date (ISO date)
   next_tacho_date: string | null;    // Next tachograph date
   next_atp_date: string | null;      // Next ATP/frigo date
-  insurance_expiry: string | null;   // Insurance expiry date (Deprecated in UI)
   next_oil_change_km: number | null; // Next oil change mileage
   updated_at: string;         // Last update timestamp
 }
@@ -83,9 +82,7 @@ export interface MaintenanceLog {
   intervention_type_id?: number; // Link to intervention type
   description: string;
   attachment_url: string | null;
-  cost: number | null;
   tire_position: string | null; // Comma-separated or JSON
-  tire_action: TireAction | null;
 }
 
 
@@ -123,7 +120,6 @@ export interface TrafficLightStatus {
   itv: TrafficLightColor;
   tacho: TrafficLightColor;
   atp: TrafficLightColor;
-  insurance: TrafficLightColor;
 }
 
 // =============================================
@@ -136,10 +132,8 @@ export interface MaintenanceFormData {
   category: MaintenanceCategory;
   description: string;
   attachment: File | null;
-  cost?: number;
   // Tire-specific
   tirePosition?: TirePosition;
-  tireAction?: TireAction;
   // Legal-specific
   newExpiryDate?: string;
   // Smart List

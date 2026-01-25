@@ -28,7 +28,6 @@ export function VisualStatusRing({
             legal.next_itv_date,
             legal.next_tacho_date,
             legal.next_atp_date,
-            legal.insurance_expiry
         ];
 
         let totalScore = 0;
