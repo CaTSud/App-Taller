@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { FcmInitializer } from "@/components/FcmInitializer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,6 +45,7 @@ export default function RootLayout({
       >
         {children}
         <Toaster richColors position="top-center" />
+        <FcmInitializer />
       </body>
     </html>
   );
