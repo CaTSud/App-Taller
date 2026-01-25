@@ -9,9 +9,6 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    allowedDevOrigins: ["192.168.88.9:3000"],
-  },
   turbopack: {},
 };
 
