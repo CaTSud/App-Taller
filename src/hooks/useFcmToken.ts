@@ -8,33 +8,52 @@ import { createClient } from '@/lib/supabase/client';
 export const useFcmToken = () => {
     const [token, setToken] = useState<string | null>(null);
     const [permission, setPermission] = useState<NotificationPermission>('default');
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const retrieveToken = async () => {
             try {
-                if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-                    const messaging = await getFirebaseMessaging();
+                // Only run in browser environment
+                if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('Notification' in window)) {
+                    return;
+                }
 
-                    if (!messaging) return;
+                // Check if user is authenticated before requesting FCM token
+                const supabase = createClient();
+                const { data: { user } } = await supabase.auth.getUser();
 
-                    const permissionResult = await Notification.requestPermission();
-                    setPermission(permissionResult);
+                if (!user) {
+                    // User not logged in, don't request notifications yet
+                    return;
+                }
 
-                    if (permissionResult === 'granted') {
-                        const currentToken = await getToken(messaging, {
-                            vapidKey: 'BIy9dYR5mPVG4v0ZFP4fGASwUTnRX6yl_jPxFV6WTrsUZh3zSRqAeBMkjpV1dpbp4sd4HXEByfYS9O1e0XVGdqc' // Optional, but recommended to add if you have one
-                        });
+                const messaging = await getFirebaseMessaging();
 
-                        if (currentToken) {
-                            setToken(currentToken);
-                            await saveTokenToDatabase(currentToken);
-                        } else {
-                            console.log('No registration token available. Request permission to generate one.');
-                        }
+                if (!messaging) {
+                    console.log('Firebase Messaging not supported in this browser');
+                    return;
+                }
+
+                const permissionResult = await Notification.requestPermission();
+                setPermission(permissionResult);
+
+                if (permissionResult === 'granted') {
+                    const currentToken = await getToken(messaging, {
+                        vapidKey: 'BIy9dYR5mPVG4v0ZFP4fGASwUTnRX6yl_jPxFV6WTrsUZh3zSRqAeBMkjpV1dpbp4sd4HXEByfYS9O1e0XVGdqc'
+                    });
+
+                    if (currentToken) {
+                        setToken(currentToken);
+                        await saveTokenToDatabase(currentToken);
+                    } else {
+                        console.log('No registration token available.');
                     }
                 }
-            } catch (error) {
-                console.error('An error occurred while retrieving token:', error);
+            } catch (err) {
+                // Silently handle errors - don't crash the app
+                const errorMessage = err instanceof Error ? err.message : 'Unknown FCM error';
+                console.warn('FCM initialization skipped:', errorMessage);
+                setError(errorMessage);
             }
         };
 
