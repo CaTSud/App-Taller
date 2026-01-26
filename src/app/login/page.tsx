@@ -24,9 +24,13 @@ export default function LoginPage() {
             const result = await signIn(email, password);
             if (result?.error) {
                 setError(result.error);
+            } else if (result?.success) {
+                // Login successful
+                router.refresh(); // Update server components
+                router.push('/');
             }
-        } catch {
-            // Redirect happens on success, so this catch handles unexpected errors
+        } catch (err) {
+            console.error('Login error:', err);
             setError('Error al iniciar sesión');
         } finally {
             setLoading(false);
