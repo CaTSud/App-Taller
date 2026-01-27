@@ -34,19 +34,21 @@ export const useFcmToken = () => {
                     return;
                 }
 
-                const permissionResult = await Notification.requestPermission();
-                setPermission(permissionResult);
+                if ('Notification' in window && 'requestPermission' in Notification) {
+                    const permissionResult = await Notification.requestPermission();
+                    setPermission(permissionResult);
 
-                if (permissionResult === 'granted') {
-                    const currentToken = await getToken(messaging, {
-                        vapidKey: 'BIy9dYR5mPVG4v0ZFP4fGASwUTnRX6yl_jPxFV6WTrsUZh3zSRqAeBMkjpV1dpbp4sd4HXEByfYS9O1e0XVGdqc'
-                    });
+                    if (permissionResult === 'granted') {
+                        const currentToken = await getToken(messaging, {
+                            vapidKey: 'BIy9dYR5mPVG4v0ZFP4fGASwUTnRX6yl_jPxFV6WTrsUZh3zSRqAeBMkjpV1dpbp4sd4HXEByfYS9O1e0XVGdqc'
+                        });
 
-                    if (currentToken) {
-                        setToken(currentToken);
-                        await saveTokenToDatabase(currentToken);
-                    } else {
-                        console.log('No registration token available.');
+                        if (currentToken) {
+                            setToken(currentToken);
+                            await saveTokenToDatabase(currentToken);
+                        } else {
+                            console.log('No registration token available.');
+                        }
                     }
                 }
             } catch (err) {

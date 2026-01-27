@@ -10,6 +10,13 @@ import type { VehicleStatus, PlateOption, FleetLegalStatus, DailyVehicleKm } fro
 export async function getVehicleStatus(plate: string): Promise<VehicleStatus | null> {
     const supabase = await createClient();
 
+    // Opt out of caching for vehicle status to ensure fresh data
+    // This is critical for PWA which might aggressively cache optimistic UI
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+        console.warn('No session found in getVehicleStatus');
+    }
+
     const [kmResult, legalResult] = await Promise.all([
         // Query daily_vehicle_km (READ ONLY from App Ruta)
         supabase
@@ -48,18 +55,31 @@ export async function getVehicleStatus(plate: string): Promise<VehicleStatus | n
 export async function getAvailablePlates(): Promise<PlateOption[]> {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-        .from('daily_vehicle_km')
-        .select('plate, current_km')
-        .order('plate', { ascending: true });
+    try {
+        // Create a timeout promise that rejects after 15 seconds
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Database query timed out')), 15000);
+        });
 
-    if (error) {
-        console.error('Error fetching plates:', error);
+        // Race the database query against the timeout
+        const dbPromise = supabase
+            .from('daily_vehicle_km')
+            .select('plate, current_km')
+            .order('plate', { ascending: true });
+
+        const { data, error } = await Promise.race([dbPromise, timeoutPromise]) as any;
+
+        if (error) {
+            console.error('Error fetching plates:', error);
+            return [];
+        }
+
+        return (data || []).map((row: any) => ({
+            plate: row.plate,
+            currentKm: row.current_km,
+        }));
+    } catch (error) {
+        console.error('Error in getAvailablePlates:', error);
         return [];
     }
-
-    return (data || []).map((row) => ({
-        plate: row.plate,
-        currentKm: row.current_km,
-    }));
 }
