@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { FcmInitializer } from "@/components/FcmInitializer";
+import { OfflineStatus } from "@/components/OfflineStatus";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
       >
+        <OfflineStatus />
         {children}
         <Toaster richColors position="top-center" />
         <FcmInitializer />

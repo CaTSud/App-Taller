@@ -247,11 +247,11 @@ export function MaintenanceForm({
                         <SheetClose asChild>
                             <Button
                                 variant="ghost"
-                                size="sm"
-                                className="bg-black/20 hover:bg-black/40 text-white border border-white/10 rounded-full pl-2 pr-4 h-9 font-bold backdrop-blur-md transition-all active:scale-95"
+                                size="lg"
+                                className="bg-black/20 hover:bg-black/40 text-white border border-white/10 rounded-full pl-3 pr-5 h-12 font-bold backdrop-blur-md transition-all active:scale-95"
                             >
-                                <ChevronLeft className="w-4 h-4 mr-1" />
-                                Atras
+                                <ChevronLeft className="w-5 h-5 mr-1" />
+                                Atrás
                             </Button>
                         </SheetClose>
                     </div>
@@ -341,6 +341,8 @@ export function MaintenanceForm({
                                         onFocus={() => setShowSuggestions(true)}
                                         placeholder="Buscar o crear..."
                                         className="h-16 bg-slate-800/80 border-slate-700 rounded-2xl text-lg font-bold placeholder:text-slate-600 focus:ring-blue-500/50 pr-12"
+                                        autoComplete="off"
+                                        autoCorrect="off"
                                     />
                                     {interventionTypeName && (
                                         <button
