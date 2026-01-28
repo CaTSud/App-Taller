@@ -352,8 +352,8 @@ export function MaintenanceForm({
                             </div>
                         </div>
 
-                        {/* Section Card: Intervention Details */}
-                        <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2.5rem] shadow-sm backdrop-blur-sm space-y-6">
+                        {/* Section Card: Intervention Details (higher z-index for dropdown) */}
+                        <div className="relative z-20 bg-slate-900/40 border border-slate-800 p-6 rounded-[2.5rem] shadow-sm backdrop-blur-sm space-y-6">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
                                     <Wrench className="w-4 h-4" />
@@ -407,7 +407,7 @@ export function MaintenanceForm({
                                         </button>
                                     )}
                                     {showSuggestions && (
-                                        <div className="absolute z-50 w-full mt-2 bg-slate-800 border-2 border-slate-700 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 max-h-64 overflow-y-auto">
+                                        <div className="absolute z-[100] w-full mt-2 bg-slate-800 border-2 border-slate-700 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 max-h-64 overflow-y-auto">
                                             {filteredInterventionTypes.length > 0 ? (
                                                 filteredInterventionTypes.map((type) => (
                                                     <button
@@ -471,8 +471,8 @@ export function MaintenanceForm({
                             </div>
                         </div>
 
-                        {/* Section Card: Photos */}
-                        <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-[2.5rem] shadow-sm backdrop-blur-sm space-y-6">
+                        {/* Section Card: Photos (lower z-index) */}
+                        <div className="relative z-10 bg-slate-900/40 border border-slate-800 p-6 rounded-[2.5rem] shadow-sm backdrop-blur-sm space-y-6">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
                                     <Camera className="w-4 h-4" />
