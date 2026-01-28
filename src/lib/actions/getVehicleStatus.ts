@@ -12,9 +12,9 @@ export async function getVehicleStatus(plate: string): Promise<VehicleStatus | n
 
     // Opt out of caching for vehicle status to ensure fresh data
     // This is critical for PWA which might aggressively cache optimistic UI
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-        console.warn('No session found in getVehicleStatus');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        console.warn('No authenticated user found in getVehicleStatus');
     }
 
     const [kmResult, legalResult] = await Promise.all([

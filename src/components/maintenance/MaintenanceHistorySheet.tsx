@@ -18,6 +18,7 @@ interface MaintenanceHistorySheetProps {
     onOpenChange: (open: boolean) => void;
     plate: string;
     onEdit: (log: MaintenanceLog) => void;
+    externalLogs?: MaintenanceLog[]; // Point 1: Optional external logs
 }
 
 const categoryIcons: Record<string, any> = {
@@ -36,19 +37,28 @@ const categoryColors: Record<string, string> = {
     ACCIDENTE: 'text-red-400 bg-red-500/10 border-red-500/20',
 };
 
-export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit }: MaintenanceHistorySheetProps) {
-    const [logs, setLogs] = useState<MaintenanceLog[]>([]);
+export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit, externalLogs }: MaintenanceHistorySheetProps) {
+    const [internalLogs, setInternalLogs] = useState<MaintenanceLog[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Use external logs if provided, otherwise fetch internally
+    const displayLogs = externalLogs || internalLogs;
+
     useEffect(() => {
+        // If external logs are provided, we don't need to load internally
+        if (externalLogs) {
+            setLoading(false);
+            return;
+        }
+
         if (open && plate) {
             setLoading(true);
             getMaintenanceLogs(plate).then(data => {
-                setLogs(data);
+                setInternalLogs(data);
                 setLoading(false);
             });
         }
-    }, [open, plate]);
+    }, [open, plate, externalLogs]);
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -69,7 +79,7 @@ export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit }: M
                             className="bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full pl-2 pr-4 h-9 font-bold backdrop-blur-md"
                         >
                             <ArrowLeft className="w-4 h-4 mr-1" />
-                            Atras
+                            Atrás
                         </Button>
                         <div className="text-[10px] font-black bg-white/10 px-2 py-0.5 rounded-full border border-white/10 text-white/40">
                             HISTORIAL
@@ -94,7 +104,7 @@ export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit }: M
                             <Loader2 className="w-10 h-10 animate-spin mb-4 opacity-20" />
                             <p className="text-sm font-bold uppercase tracking-widest animate-pulse">Cargando datos...</p>
                         </div>
-                    ) : logs.length === 0 ? (
+                    ) : displayLogs.length === 0 ? (
                         <div className="text-center py-20 px-8">
                             <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-800 opacity-50">
                                 <FileText className="w-8 h-8 text-slate-600" />
@@ -103,7 +113,7 @@ export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit }: M
                             <p className="text-sm text-slate-500 mt-1">Todavía no has guardado ninguna intervención para este vehículo.</p>
                         </div>
                     ) : (
-                        logs.map((log) => {
+                        displayLogs.map((log) => {
                             const Icon = categoryIcons[log.category] || History;
                             const date = new Date(log.created_at).toLocaleDateString('es-ES', {
                                 day: '2-digit',

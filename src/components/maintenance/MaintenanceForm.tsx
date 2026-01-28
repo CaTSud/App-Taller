@@ -30,6 +30,7 @@ import { PhotoUpload } from './PhotoUpload';
 
 import { getVehicleStatus } from '@/lib/actions/getVehicleStatus'; // Not needed here but for reference
 import { submitMaintenanceLog, uploadAttachment, getInterventionTypes } from '@/lib/actions';
+import { maintenanceLogSchema } from '@/lib/validations/maintenance';
 import type { MaintenanceCategory, TirePosition, TireAction } from '@/types/database';
 
 interface MaintenanceFormProps {
@@ -46,6 +47,7 @@ interface MaintenanceFormProps {
         tirePositions?: string[];
         newExpiryDate?: string;
     };
+    onOptimisticAction?: (log: any) => void;
 }
 
 // tireActions removed as redundant with interventionTypeName
@@ -82,6 +84,7 @@ export function MaintenanceForm({
     currentKm,
     onSuccess,
     initialData,
+    onOptimisticAction,
 }: MaintenanceFormProps) {
     const [loading, setLoading] = useState(false);
     const [description, setDescription] = useState('');
@@ -91,6 +94,8 @@ export function MaintenanceForm({
     const [interventionTypeName, setInterventionTypeName] = useState('');
     const [availableInterventionTypes, setAvailableInterventionTypes] = useState<{ id: number; name: string }[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    // Validation State
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -114,6 +119,33 @@ export function MaintenanceForm({
 
     // Legal-specific state
     const [newExpiryDate, setNewExpiryDate] = useState('');
+
+    // Real-time validation effect (Audit Point 4)
+    useEffect(() => {
+        if (!open) {
+            setErrors({});
+            return;
+        }
+
+        const validationResult = maintenanceLogSchema.safeParse({
+            plate,
+            kmAtService: currentKm,
+            category,
+            description,
+            interventionTypeName,
+        });
+
+        if (!validationResult.success) {
+            const newErrors: Record<string, string> = {};
+            validationResult.error.issues.forEach((issue: any) => {
+                const path = issue.path[0] as string;
+                newErrors[path] = issue.message;
+            });
+            setErrors(newErrors);
+        } else {
+            setErrors({});
+        }
+    }, [description, interventionTypeName, category, plate, currentKm, open]);
 
     // Pre-populate if initialData is provided (Edit Mode)
     useEffect(() => {
@@ -176,6 +208,20 @@ export function MaintenanceForm({
         }
 
         setLoading(true);
+
+        // Optimistic update (Point 3)
+        if (onOptimisticAction) {
+            onOptimisticAction({
+                id: initialData?.id || 'temp-' + Date.now(),
+                created_at: new Date().toISOString(),
+                plate,
+                km_at_service: currentKm,
+                category,
+                description,
+                intervention_types: { name: interventionTypeName },
+                attachment_url: initialData?.id ? undefined : (photo ? URL.createObjectURL(photo) : null)
+            });
+        }
 
         try {
             // Upload photo first
@@ -341,9 +387,13 @@ export function MaintenanceForm({
                                         onFocus={() => setShowSuggestions(true)}
                                         placeholder="Buscar o crear..."
                                         className="h-16 bg-slate-800/80 border-slate-700 rounded-2xl text-lg font-bold placeholder:text-slate-600 focus:ring-blue-500/50 pr-12"
-                                        autoComplete="off"
                                         autoCorrect="off"
                                     />
+                                    {errors.interventionTypeName && (
+                                        <p className="mt-2 text-xs font-bold text-red-500 animate-in fade-in slide-in-from-top-1">
+                                            {errors.interventionTypeName}
+                                        </p>
+                                    )}
                                     {interventionTypeName && (
                                         <button
                                             type="button"
@@ -396,8 +446,16 @@ export function MaintenanceForm({
                                         type="date"
                                         value={newExpiryDate}
                                         onChange={(e) => setNewExpiryDate(e.target.value)}
-                                        className="h-14 bg-slate-800/80 border-slate-700 rounded-2xl text-lg font-bold"
+                                        className={cn(
+                                            "h-14 bg-slate-800/80 border-slate-700 rounded-2xl text-lg font-bold",
+                                            !newExpiryDate && (category === 'LEGAL' || category === 'FRIGO') && "border-amber-500/50"
+                                        )}
                                     />
+                                    {!newExpiryDate && (category === 'LEGAL' || category === 'FRIGO') && (
+                                        <p className="mt-2 text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+                                            Recomendado para actualizar semáforo
+                                        </p>
+                                    )}
                                 </div>
                             )}
 
@@ -436,7 +494,10 @@ export function MaintenanceForm({
                             <Button
                                 type="submit"
                                 size="lg"
-                                className="w-full max-w-lg mx-auto h-20 text-xl font-black tracking-widest uppercase rounded-[2rem] shadow-[0_0_30px_rgba(59,130,246,0.3)] bg-blue-600 hover:bg-blue-500 transition-all hover:scale-[1.02] active:scale-95 border-b-4 border-blue-800"
+                                className={cn(
+                                    "w-full max-w-lg mx-auto h-20 text-xl font-black tracking-widest uppercase rounded-[2rem] shadow-[0_0_30px_rgba(59,130,246,0.3)] bg-blue-600 hover:bg-blue-500 transition-all hover:scale-[1.02] active:scale-95 border-b-4 border-blue-800",
+                                    Object.keys(errors).length > 0 && "opacity-80 grayscale-[20%] border-slate-700"
+                                )}
                                 disabled={loading}
                             >
                                 {loading ? (

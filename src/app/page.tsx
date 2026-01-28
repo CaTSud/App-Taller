@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useOptimistic } from 'react';
 
 import { StatusCard, TrafficLightGrid, VehicleSelector, VisualStatusRing } from '@/components/dashboard';
 import { MaintenanceForm, MaintenanceGrid, MaintenanceHistorySheet } from '@/components/maintenance';
-import { getAvailablePlates, getVehicleStatus, signOut, type MaintenanceLog } from '@/lib/actions';
+import { getAvailablePlates, getVehicleStatus, getMaintenanceLogs, signOut, type MaintenanceLog } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { LogOut, CheckCircle2, History, ChevronRight } from 'lucide-react';
 
@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [plates, setPlates] = useState<PlateOption[]>([]);
   const [selectedPlate, setSelectedPlate] = useState<string | null>(null);
   const [vehicleStatus, setVehicleStatus] = useState<VehicleStatus | null>(null);
+  const [historyLogs, setHistoryLogs] = useState<MaintenanceLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusLoading, setStatusLoading] = useState(false);
 
@@ -23,6 +24,19 @@ export default function DashboardPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<MaintenanceCategory | null>(null);
   const [editData, setEditData] = useState<any>(null);
+
+  // Optimistic History (Audit Point 3)
+  const [optimisticLogs, addOptimisticLog] = useOptimistic(
+    historyLogs,
+    (state: MaintenanceLog[], newLog: MaintenanceLog) => {
+      // If editing, find and replace; if adding, prepend
+      const exists = state.find(l => l.id === newLog.id);
+      if (exists) {
+        return state.map(l => l.id === newLog.id ? newLog : l);
+      }
+      return [newLog, ...state];
+    }
+  );
 
   // Handle category selection from grid
   const handleCategorySelect = (category: MaintenanceCategory) => {
@@ -61,15 +75,21 @@ export default function DashboardPage() {
     fetchPlates();
   }, []);
 
-  // Fetch vehicle status when plate changes
-  const fetchVehicleStatus = useCallback(async (plate: string) => {
+  // Fetch vehicle status and history in parallel when plate changes
+  const fetchDashboardData = useCallback(async (plate: string) => {
     setStatusLoading(true);
     try {
-      const status = await getVehicleStatus(plate);
+      // Parallel fetch for Audit Point 1
+      const [status, logs] = await Promise.all([
+        getVehicleStatus(plate),
+        getMaintenanceLogs(plate)
+      ]);
       setVehicleStatus(status);
+      setHistoryLogs(logs);
     } catch (error) {
-      console.error('Error fetching vehicle status:', error);
+      console.error('Error fetching dashboard data:', error);
       setVehicleStatus(null);
+      setHistoryLogs([]);
     } finally {
       setStatusLoading(false);
     }
@@ -77,9 +97,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (selectedPlate) {
-      fetchVehicleStatus(selectedPlate);
+      fetchDashboardData(selectedPlate);
     }
-  }, [selectedPlate, fetchVehicleStatus]);
+  }, [selectedPlate, fetchDashboardData]);
 
 
   if (loading) {
@@ -266,7 +286,8 @@ export default function DashboardPage() {
         plate={selectedPlate || ''}
         currentKm={vehicleStatus?.currentKm || 0}
         initialData={editData}
-        onSuccess={() => selectedPlate && fetchVehicleStatus(selectedPlate)}
+        onSuccess={() => selectedPlate && fetchDashboardData(selectedPlate)}
+        onOptimisticAction={addOptimisticLog}
       />
 
       {/* Maintenance History */}
@@ -275,6 +296,7 @@ export default function DashboardPage() {
         onOpenChange={setHistoryOpen}
         plate={selectedPlate || ''}
         onEdit={handleEditLog}
+        externalLogs={historyLogs}
       />
     </main>
   );

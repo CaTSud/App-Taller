@@ -133,13 +133,22 @@ export async function submitMaintenanceLog(
 
         // If LEGAL or FRIGO category with new expiry date, update fleet_legal_status
         if ((data.category === 'LEGAL' || data.category === 'FRIGO') && data.newExpiryDate) {
-            await updateLegalStatus(
+            const legalUpdate = await updateLegalStatus(
                 supabase,
                 data.plate,
                 data.description,
                 data.interventionTypeName || '',
                 data.newExpiryDate
             );
+
+            if (!legalUpdate.success) {
+                // We don't return early but we should probably inform or handle it
+                console.error('Legal status update failed:', legalUpdate.error);
+                return {
+                    success: false,
+                    error: `Registro guardado, pero falló la actualización del calendario: ${legalUpdate.error}`
+                };
+            }
         }
 
         // Logic for Oil Change (v3.5) - Enhanced Detection
@@ -181,12 +190,12 @@ export async function submitMaintenanceLog(
  * Updates fleet_legal_status based on favorable inspection result
  */
 async function updateLegalStatus(
-    supabase: Awaited<ReturnType<typeof createClient>>,
+    supabase: any, // Using any for simplicity in this context
     plate: string,
     description: string,
     interventionType: string,
     newExpiryDate: string
-) {
+): Promise<{ success: boolean; error?: string }> {
     // Determine which field to update based on description OR intervention type
     const searchString = `${description} ${interventionType}`.toLowerCase();
 
@@ -200,7 +209,9 @@ async function updateLegalStatus(
         updateField = 'next_atp_date';
     }
 
-    if (!updateField) return;
+    if (!updateField) {
+        return { success: true }; // Nothing to update
+    }
 
     // Upsert the fleet_legal_status record
     const { error } = await supabase
@@ -209,13 +220,17 @@ async function updateLegalStatus(
             {
                 plate,
                 [updateField]: newExpiryDate,
+                updated_at: new Date().toISOString(),
             },
             { onConflict: 'plate' }
         );
 
     if (error) {
         console.error('Error updating fleet_legal_status:', error);
+        return { success: false, error: error.message };
     }
+
+    return { success: true };
 }
 
 /**
