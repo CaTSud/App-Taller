@@ -251,7 +251,7 @@ export async function uploadAttachment(
 
         // Upload to storage bucket
         const { data, error } = await supabase.storage
-            .from('maintenance-attachments')
+            .from('ALBARANS')
             .upload(filename, file, {
                 cacheControl: '3600',
                 upsert: false,
@@ -264,7 +264,7 @@ export async function uploadAttachment(
 
         // Get public URL
         const { data: urlData } = supabase.storage
-            .from('maintenance-attachments')
+            .from('ALBARANS')
             .getPublicUrl(data.path);
 
         return {
