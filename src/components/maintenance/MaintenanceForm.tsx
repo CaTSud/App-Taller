@@ -29,7 +29,7 @@ import { TireSelector } from './TireSelector';
 import { PhotoUpload } from './PhotoUpload';
 
 import { getVehicleStatus } from '@/lib/actions/getVehicleStatus'; // Not needed here but for reference
-import { submitMaintenanceLog, uploadAttachment, getInterventionTypes } from '@/lib/actions';
+import { submitMaintenanceLog, uploadAttachment, getInterventionTypes, type MaintenanceLog } from '@/lib/actions';
 import { maintenanceLogSchema } from '@/lib/validations/maintenance';
 import type { MaintenanceCategory, TirePosition, TireAction } from '@/types/database';
 
@@ -47,7 +47,7 @@ interface MaintenanceFormProps {
         tirePositions?: string[];
         newExpiryDate?: string;
     };
-    onOptimisticAction?: (log: any) => void;
+    onOptimisticAction?: (log: Partial<MaintenanceLog>) => void;
 }
 
 // tireActions removed as redundant with interventionTypeName
@@ -137,7 +137,7 @@ export function MaintenanceForm({
 
         if (!validationResult.success) {
             const newErrors: Record<string, string> = {};
-            validationResult.error.issues.forEach((issue: any) => {
+            validationResult.error.issues.forEach((issue) => { // Zod infers this
                 const path = issue.path[0] as string;
                 newErrors[path] = issue.message;
             });
@@ -220,7 +220,7 @@ export function MaintenanceForm({
                 description,
                 intervention_types: { name: interventionTypeName },
                 attachment_url: initialData?.id ? undefined : (photo ? URL.createObjectURL(photo) : null)
-            });
+            }); // Type inference or explicit type in props definition handles this better
         }
 
         try {
@@ -427,7 +427,7 @@ export function MaintenanceForm({
                                                     className="px-5 py-4 text-sm text-blue-400 font-black cursor-pointer hover:bg-blue-600 hover:text-white transition"
                                                     onClick={() => setShowSuggestions(false)}
                                                 >
-                                                    + CREAR "{interventionTypeName}"
+                                                    + CREAR &quot;{interventionTypeName}&quot;
                                                 </div>
                                             )}
                                         </div>

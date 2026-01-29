@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { VehicleStatus, PlateOption, FleetLegalStatus, DailyVehicleKm } from '@/types/database';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 /**
  * Fetches unified vehicle status from both daily_vehicle_km and fleet_legal_status
@@ -67,14 +68,14 @@ export async function getAvailablePlates(): Promise<PlateOption[]> {
             .select('plate, current_km')
             .order('plate', { ascending: true });
 
-        const { data, error } = await Promise.race([dbPromise, timeoutPromise]) as any;
+        const { data, error } = await Promise.race([dbPromise, timeoutPromise]) as { data: { plate: string; current_km: number }[] | null, error: PostgrestError | null };
 
         if (error) {
             console.error('Error fetching plates:', error);
             return [];
         }
 
-        return (data || []).map((row: any) => ({
+        return (data || []).map((row) => ({
             plate: row.plate,
             currentKm: row.current_km,
         }));

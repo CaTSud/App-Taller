@@ -146,7 +146,15 @@ async function getAccessToken() {
 }
 
 // Helper: Send FCM Message
-async function sendFcmMessage(accessToken: string, deviceToken: string, message: any) {
+interface FcmMessage {
+    notification?: {
+        title: string;
+        body: string;
+    };
+    data?: Record<string, string>;
+}
+
+async function sendFcmMessage(accessToken: string, deviceToken: string, message: FcmMessage) {
     const projectId = serviceAccount.project_id;
     const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
 

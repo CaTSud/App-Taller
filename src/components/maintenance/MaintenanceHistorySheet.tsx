@@ -21,7 +21,7 @@ interface MaintenanceHistorySheetProps {
     externalLogs?: MaintenanceLog[]; // Point 1: Optional external logs
 }
 
-const categoryIcons: Record<string, any> = {
+const categoryIcons: Record<string, React.ElementType> = {
     MECANICA: Wrench,
     NEUMATICOS: CircleDot,
     LEGAL: Scale,
@@ -43,21 +43,23 @@ export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit, ext
 
     // Use external logs if provided, otherwise fetch internally
     const displayLogs = externalLogs || internalLogs;
+    const isListLoading = externalLogs ? false : loading;
 
     useEffect(() => {
-        // If external logs are provided, we don't need to load internally
-        if (externalLogs) {
-            setLoading(false);
-            return;
-        }
+        let active = true;
 
-        if (open && plate) {
-            setLoading(true);
+        if (!externalLogs && open && plate) {
             getMaintenanceLogs(plate).then(data => {
-                setInternalLogs(data);
-                setLoading(false);
+                if (active) {
+                    setInternalLogs(data);
+                    setLoading(false);
+                }
             });
         }
+
+        return () => {
+            active = false;
+        };
     }, [open, plate, externalLogs]);
 
     return (
@@ -99,7 +101,7 @@ export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit, ext
 
                 {/* Content Area */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 pb-12">
-                    {loading ? (
+                    {isListLoading ? (
                         <div className="flex flex-col items-center justify-center py-20 text-slate-500">
                             <Loader2 className="w-10 h-10 animate-spin mb-4 opacity-20" />
                             <p className="text-sm font-bold uppercase tracking-widest animate-pulse">Cargando datos...</p>

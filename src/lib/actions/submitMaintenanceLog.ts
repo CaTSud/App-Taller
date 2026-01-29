@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { maintenanceLogSchema } from '@/lib/validations/maintenance';
 import { revalidatePath } from 'next/cache';
 import type { ActionResponse, MaintenanceCategory } from '@/types/database';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 interface MaintenanceLogData {
     id?: string;
@@ -190,7 +191,7 @@ export async function submitMaintenanceLog(
  * Updates fleet_legal_status based on favorable inspection result
  */
 async function updateLegalStatus(
-    supabase: any, // Using any for simplicity in this context
+    supabase: SupabaseClient,
     plate: string,
     description: string,
     interventionType: string,

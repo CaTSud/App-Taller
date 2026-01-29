@@ -23,7 +23,15 @@ export default function DashboardPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<MaintenanceCategory | null>(null);
-  const [editData, setEditData] = useState<any>(null);
+
+  type EditLogData = {
+    id: string;
+    description: string;
+    interventionTypeName: string;
+    tirePositions: string[];
+    newExpiryDate?: string;
+  };
+  const [editData, setEditData] = useState<EditLogData | null>(null);
 
   // Optimistic History (Audit Point 3)
   const [optimisticLogs, addOptimisticLog] = useOptimistic(
@@ -285,9 +293,9 @@ export default function DashboardPage() {
         category={selectedCategory}
         plate={selectedPlate || ''}
         currentKm={vehicleStatus?.currentKm || 0}
-        initialData={editData}
+        initialData={editData || undefined}
         onSuccess={() => selectedPlate && fetchDashboardData(selectedPlate)}
-        onOptimisticAction={addOptimisticLog}
+        onOptimisticAction={(log) => addOptimisticLog(log as MaintenanceLog)}
       />
 
       {/* Maintenance History */}
