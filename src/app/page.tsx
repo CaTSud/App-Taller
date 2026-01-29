@@ -6,7 +6,8 @@ import { StatusCard, TrafficLightGrid, VehicleSelector, VisualStatusRing } from 
 import { MaintenanceForm, MaintenanceGrid, MaintenanceHistorySheet } from '@/components/maintenance';
 import { getAvailablePlates, getVehicleStatus, getMaintenanceLogs, signOut, type MaintenanceLog } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
-import { LogOut, CheckCircle2, History, ChevronRight } from 'lucide-react';
+import { LogOut, CheckCircle2, History, ChevronRight, Bell } from 'lucide-react';
+import { NotificationToggle } from '@/components/NotificationToggle';
 
 import type { PlateOption, VehicleStatus, MaintenanceCategory } from '@/types/database';
 
@@ -194,13 +195,16 @@ export default function DashboardPage() {
           >
             <LogOut className="w-5 h-5 opacity-50 rotate-180" />
           </Button>
-          <div>
-            <h2 className="text-2xl font-black text-white leading-none">
-              {selectedPlate}
-            </h2>
-            <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-1">
-              Dashboard Principal
-            </p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-black text-white leading-none">
+                {selectedPlate}
+              </h2>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-1">
+                Dashboard Principal
+              </p>
+            </div>
+            <NotificationToggle />
           </div>
         </div>
         <Button

@@ -1,16 +1,28 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { JWT } from 'npm:google-auth-library'
-import serviceAccount from './service-account.json' with { type: 'json' }
 
-// Configuration
+// Firebase Service Account structure
+interface ServiceAccount {
+    project_id: string;
+    client_email: string;
+    private_key: string;
+}
+
+const getServiceAccount = (): ServiceAccount => {
+    const json = Deno.env.get('FIREBASE_SERVICE_ACCOUNT');
+    if (!json) throw new Error('Missing FIREBASE_SERVICE_ACCOUNT secret');
+    return JSON.parse(json);
+};
+
+// Configuration: Alert 7 days before expiry
 const PRE_NOTIFICATION_DAYS = 7;
 
 Deno.serve(async (req) => {
     try {
-        // 1. Initialize Supabase Client (Service Role for admin access)
+        // 1. Initialize Supabase Client
         const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-        const supabaseServiceKey = Deno.env.get('SERVICE_ROLE_KEY') ?? '';
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
         if (!supabaseUrl || !supabaseServiceKey) {
             throw new Error('Missing Supabase environment variables');
@@ -23,10 +35,7 @@ Deno.serve(async (req) => {
         targetDate.setDate(targetDate.getDate() + PRE_NOTIFICATION_DAYS);
         const targetDateStr = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
-        console.log(`Checking alerts for date: ${targetDateStr}`);
-
-        // 3. Query expiry dates from fleet_legal_status
-        // We check ITV, Tacho, and ATP
+        // 3. Query expiry dates
         const { data: vehicles, error: dbError } = await supabase
             .from('fleet_legal_status')
             .select('plate, next_itv_date, next_tacho_date, next_atp_date');
@@ -37,15 +46,9 @@ Deno.serve(async (req) => {
 
         // 4. Identify vehicles needing alerts
         for (const vehicle of vehicles || []) {
-            if (vehicle.next_itv_date === targetDateStr) {
-                alertsToSend.push({ plate: vehicle.plate, type: 'ITV', date: vehicle.next_itv_date });
-            }
-            if (vehicle.next_tacho_date === targetDateStr) {
-                alertsToSend.push({ plate: vehicle.plate, type: 'TACHO', date: vehicle.next_tacho_date });
-            }
-            if (vehicle.next_atp_date === targetDateStr) {
-                alertsToSend.push({ plate: vehicle.plate, type: 'ATP', date: vehicle.next_atp_date });
-            }
+            if (vehicle.next_itv_date === targetDateStr) alertsToSend.push({ plate: vehicle.plate, type: 'ITV', date: vehicle.next_itv_date });
+            if (vehicle.next_tacho_date === targetDateStr) alertsToSend.push({ plate: vehicle.plate, type: 'TACHO', date: vehicle.next_tacho_date });
+            if (vehicle.next_atp_date === targetDateStr) alertsToSend.push({ plate: vehicle.plate, type: 'ATP', date: vehicle.next_atp_date });
         }
 
         if (alertsToSend.length === 0) {
@@ -70,8 +73,6 @@ Deno.serve(async (req) => {
             }
         }
 
-        console.log(`Found ${finalAlerts.length} new alerts to send.`);
-
         if (finalAlerts.length === 0) {
             return new Response(JSON.stringify({ message: 'All found alerts were already sent' }), {
                 headers: { 'Content-Type': 'application/json' }
@@ -84,7 +85,6 @@ Deno.serve(async (req) => {
         // 7. Get all user tokens
         const { data: userTokens } = await supabase.from('user_fcm_tokens').select('token');
         if (!userTokens || userTokens.length === 0) {
-            console.log('No devices registered to receive notifications.');
             return new Response(JSON.stringify({ message: 'No devices registered' }), {
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -98,21 +98,13 @@ Deno.serve(async (req) => {
                     title: `⚠️ Mantenimiento Próximo: ${alert.plate}`,
                     body: `El vencimiento de ${alert.type} es el ${alert.date} (en 7 días).`
                 },
-                data: {
-                    plate: alert.plate,
-                    type: alert.type
-                }
+                data: { plate: alert.plate, type: alert.type }
             };
 
-            // Send to all tokens (fan-out)
-            // In production, consider using Topic Messaging 'all_drivers' instead of iterating tokens
-            const promises = userTokens.map(t =>
-                sendFcmMessage(accessToken, t.token, message)
-            );
-
+            const promises = userTokens.map(t => sendFcmMessage(accessToken, t.token, message));
             await Promise.all(promises);
 
-            // Log success
+            // Log success to prevent duplicates
             await supabase.from('notification_logs').insert({
                 plate: alert.plate,
                 alert_type: alert.type,
@@ -127,14 +119,12 @@ Deno.serve(async (req) => {
         });
 
     } catch (error) {
-        console.error(error);
-        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 });
     }
 });
 
-
-// Helper: Get Google Access Token
 async function getAccessToken() {
+    const serviceAccount = getServiceAccount();
     const client = new JWT({
         email: serviceAccount.client_email,
         key: serviceAccount.private_key,
@@ -145,25 +135,9 @@ async function getAccessToken() {
     return token;
 }
 
-// Helper: Send FCM Message
-interface FcmMessage {
-    notification?: {
-        title: string;
-        body: string;
-    };
-    data?: Record<string, string>;
-}
-
-async function sendFcmMessage(accessToken: string, deviceToken: string, message: FcmMessage) {
-    const projectId = serviceAccount.project_id;
-    const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
-
-    const payload = {
-        message: {
-            token: deviceToken,
-            ...message
-        }
-    };
+async function sendFcmMessage(accessToken: string, deviceToken: string, message: any) {
+    const serviceAccount = getServiceAccount();
+    const url = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`;
 
     const res = await fetch(url, {
         method: 'POST',
@@ -171,7 +145,7 @@ async function sendFcmMessage(accessToken: string, deviceToken: string, message:
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ message: { token: deviceToken, ...message } })
     });
 
     return res.json();

@@ -19,12 +19,34 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    // Customize notification here
-    const notificationTitle = payload.notification.title;
+
+    const notificationTitle = payload.notification?.title || 'Notificación de App Taller';
     const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/icon-192.png' // Ensure this icon exists in public folder
+        body: payload.notification?.body || 'Tienes un nuevo aviso de mantenimiento.',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        data: payload.data
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+self.addEventListener('notificationclick', (event) => {
+    console.log('[firebase-messaging-sw.js] Notification click Received.');
+    event.notification.close();
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            if (clientList.length > 0) {
+                let client = clientList[0];
+                for (let i = 0; i < clientList.length; i++) {
+                    if (clientList[i].focused) {
+                        client = clientList[i];
+                    }
+                }
+                return client.focus();
+            }
+            return clients.openWindow('/');
+        })
+    );
 });
