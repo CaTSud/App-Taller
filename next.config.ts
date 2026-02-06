@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: 'standalone',
   turbopack: {},
-  allowedDevOrigins: ["192.168.18.231:3000"],
+  allowedDevOrigins: ["192.168.18.185:3000"],
 };
 
 export default withPWA(nextConfig);

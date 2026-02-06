@@ -9,7 +9,8 @@ export type MaintenanceCategory =
   | 'NEUMATICOS'
   | 'LEGAL'
   | 'FRIGO'
-  | 'ACCIDENTE';
+  | 'ACCIDENTE'
+  | 'LAVADO_ENGRASE';
 
 // Tire position options
 export type TirePosition =

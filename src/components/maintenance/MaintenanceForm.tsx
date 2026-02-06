@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Lock, Loader2, Calendar as CalendarIcon, X, Wrench, CircleDot, Scale, Snowflake, ClipboardList, Camera, AlertCircle, ChevronLeft } from 'lucide-react';
+import { Lock, Loader2, Calendar as CalendarIcon, X, Wrench, CircleDot, Scale, Snowflake, ClipboardList, Camera, AlertCircle, ChevronLeft, Droplets } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -58,6 +58,7 @@ const categoryLabels: Record<MaintenanceCategory, string> = {
     LEGAL: 'ITV / TACO',
     FRIGO: 'FRIGO',
     ACCIDENTE: 'ACCIDENTE',
+    LAVADO_ENGRASE: 'LAVADO Y ENGRASE',
 };
 
 const categoryIcons: Record<MaintenanceCategory, React.ReactNode> = {
@@ -66,6 +67,7 @@ const categoryIcons: Record<MaintenanceCategory, React.ReactNode> = {
     LEGAL: <Scale className="w-10 h-10" />,
     FRIGO: <Snowflake className="w-10 h-10" />,
     ACCIDENTE: <AlertCircle className="w-10 h-10" />,
+    LAVADO_ENGRASE: <Droplets className="w-10 h-10" />,
 };
 
 const categoryThemes: Record<MaintenanceCategory, string> = {
@@ -74,6 +76,7 @@ const categoryThemes: Record<MaintenanceCategory, string> = {
     LEGAL: 'from-emerald-600/30 to-emerald-950 text-emerald-400 border-emerald-500/30',
     FRIGO: 'from-cyan-600/30 to-cyan-950 text-cyan-400 border-cyan-500/30',
     ACCIDENTE: 'from-red-600/30 to-red-950 text-red-400 border-red-500/30',
+    LAVADO_ENGRASE: 'from-indigo-600/30 to-indigo-950 text-indigo-400 border-indigo-500/30',
 };
 
 export function MaintenanceForm({

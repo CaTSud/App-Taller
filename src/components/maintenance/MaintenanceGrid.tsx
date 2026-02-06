@@ -1,6 +1,6 @@
 'use client';
 
-import { Wrench, Scale, Snowflake } from 'lucide-react';
+import { Wrench, Scale, Snowflake, Droplets } from 'lucide-react';
 import { WheelIcon } from '@/components/icons/WheelIcon';
 import { cn } from '@/lib/utils';
 import type { MaintenanceCategory } from '@/types/database';
@@ -53,6 +53,15 @@ const categories: {
             color: 'from-cyan-500/10 to-cyan-600/10 hover:from-cyan-500/20 hover:to-cyan-600/20 text-cyan-400',
             borderColor: 'border-cyan-500/20 hover:border-cyan-500/50',
             glowColor: 'group-hover:bg-cyan-500/20'
+        },
+        {
+            id: 'LAVADO_ENGRASE',
+            label: 'Lavado y Engrase',
+            description: 'Limpieza y lubricación',
+            icon: <Droplets className="w-8 h-8" />,
+            color: 'from-indigo-500/10 to-indigo-600/10 hover:from-indigo-500/20 hover:to-indigo-600/20 text-indigo-400',
+            borderColor: 'border-indigo-500/20 hover:border-indigo-500/50',
+            glowColor: 'group-hover:bg-indigo-500/20'
         }
     ];
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { History, Calendar, ArrowLeft, Loader2, Wrench, CircleDot, Scale, Snowflake, AlertCircle, ChevronRight, Clock, FileText } from 'lucide-react';
+import { History, Calendar, ArrowLeft, Loader2, Wrench, CircleDot, Scale, Snowflake, AlertCircle, ChevronRight, Clock, FileText, Droplets } from 'lucide-react';
 import {
     Sheet,
     SheetContent,
@@ -27,6 +27,7 @@ const categoryIcons: Record<string, React.ElementType> = {
     LEGAL: Scale,
     FRIGO: Snowflake,
     ACCIDENTE: AlertCircle,
+    LAVADO_ENGRASE: Droplets,
 };
 
 const categoryColors: Record<string, string> = {
@@ -35,6 +36,7 @@ const categoryColors: Record<string, string> = {
     LEGAL: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
     FRIGO: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
     ACCIDENTE: 'text-red-400 bg-red-500/10 border-red-500/20',
+    LAVADO_ENGRASE: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
 };
 
 export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit, externalLogs }: MaintenanceHistorySheetProps) {
