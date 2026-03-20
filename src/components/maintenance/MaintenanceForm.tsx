@@ -89,6 +89,7 @@ export function MaintenanceForm({
     const [loading, setLoading] = useState(false);
     const [description, setDescription] = useState('');
     const [photo, setPhoto] = useState<File | null>(null);
+    const [localKmStr, setLocalKmStr] = useState<string>('');
 
     // Smart List State
     const [interventionTypeName, setInterventionTypeName] = useState('');
@@ -154,10 +155,12 @@ export function MaintenanceForm({
             setInterventionTypeName(initialData.interventionTypeName || '');
             setTirePositions((initialData.tirePositions as TirePosition[]) || []);
             setNewExpiryDate(initialData.newExpiryDate || '');
+            setLocalKmStr(currentKm.toString());
         } else if (open && !initialData) {
             resetForm();
+            setLocalKmStr(currentKm.toString());
         }
-    }, [initialData, open]);
+    }, [initialData, open, currentKm]);
 
     // Fetch intervention types when category changes
     useEffect(() => {
@@ -196,6 +199,12 @@ export function MaintenanceForm({
         e.preventDefault();
         if (!category) return;
 
+        const finalKm = parseInt(localKmStr, 10);
+        if (isNaN(finalKm) || finalKm < 0) {
+            toast.error('Por favor, introduce un kilometraje válido');
+            return;
+        }
+
         // Validation
         if (!interventionTypeName.trim()) {
             toast.error('Debes introducir el tipo de intervención antes de guardar');
@@ -215,7 +224,7 @@ export function MaintenanceForm({
                 id: initialData?.id || 'temp-' + Date.now(),
                 created_at: new Date().toISOString(),
                 plate,
-                km_at_service: currentKm,
+                km_at_service: finalKm,
                 category,
                 description,
                 intervention_types: { name: interventionTypeName },
@@ -240,7 +249,7 @@ export function MaintenanceForm({
             const result = await submitMaintenanceLog({
                 id: initialData?.id,
                 plate,
-                kmAtService: currentKm,
+                kmAtService: finalKm,
                 category,
                 description,
                 tirePosition: tirePositions.length > 0 ? tirePositions.join(',') : undefined,
@@ -343,11 +352,13 @@ export function MaintenanceForm({
                                 <div className="space-y-3">
                                     <Label className="text-slate-400 font-bold text-sm ml-1 uppercase tracking-wider flex items-center gap-1">
                                         Kilómetros
-                                        <Lock className="w-3 h-3 text-slate-600" />
                                     </Label>
-                                    <div className="bg-slate-800/50 border border-slate-700 h-14 rounded-2xl flex items-center px-4 shadow-inner opacity-60">
-                                        <span className="text-xl font-black text-slate-400 tabular-nums">{currentKm.toLocaleString('es-ES')}</span>
-                                    </div>
+                                    <Input
+                                        type="number"
+                                        value={localKmStr}
+                                        onChange={(e) => setLocalKmStr(e.target.value)}
+                                        className="h-14 bg-slate-800/80 border-slate-700 rounded-2xl text-xl font-black text-white tabular-nums px-4 focus:ring-blue-500/50"
+                                    />
                                 </div>
                             </div>
                         </div>

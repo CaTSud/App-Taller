@@ -132,6 +132,32 @@ export async function submitMaintenanceLog(
             resultLog = insertedLog;
         }
 
+        // Update daily_vehicle_km with the new kmAtService (only if it's new log)
+        if (!data.id) {
+            const { data: existingKm } = await supabase
+                .from('daily_vehicle_km')
+                .select('id, current_km')
+                .eq('plate', data.plate)
+                .single();
+
+            if (existingKm) {
+                if (data.kmAtService > existingKm.current_km || existingKm.current_km === 0) {
+                    await supabase
+                        .from('daily_vehicle_km')
+                        .update({ current_km: data.kmAtService, last_update: new Date().toISOString() })
+                        .eq('id', existingKm.id);
+                }
+            } else {
+                await supabase
+                    .from('daily_vehicle_km')
+                    .insert({
+                        plate: data.plate,
+                        current_km: data.kmAtService,
+                        last_update: new Date().toISOString()
+                    });
+            }
+        }
+
         // If LEGAL or FRIGO category with new expiry date, update fleet_legal_status
         if ((data.category === 'LEGAL' || data.category === 'FRIGO') && data.newExpiryDate) {
             const legalUpdate = await updateLegalStatus(
