@@ -34,6 +34,27 @@ export async function getInterventionTypes(category: MaintenanceCategory): Promi
         }
     }
 
+    // USER REQUEST: Default types for LAVADO_ENGRASE
+    if (category === 'LAVADO_ENGRASE') {
+        const defaultTypes = [
+            'Lavado y engrase',
+            'Lavado, engrase y interior caja',
+            'Lavado',
+            'Engrase',
+        ];
+
+        defaultTypes.forEach((name, index) => {
+            if (!results.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                results.push({
+                    id: -(index + 100), // Avoid collision
+                    category: 'LAVADO_ENGRASE',
+                    name: name,
+                    is_default: true
+                });
+            }
+        });
+    }
+
     return results;
 }
 

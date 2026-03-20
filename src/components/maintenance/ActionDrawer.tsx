@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Wrench, CircleDot, Scale, Snowflake } from 'lucide-react';
+import { Plus, Wrench, CircleDot, Scale, Snowflake, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -53,6 +53,13 @@ const categoryOptions: {
             description: 'Mantenimiento ATP',
             icon: <Snowflake className="w-8 h-8" />,
             color: 'bg-cyan-500/20 border-cyan-500 text-cyan-400',
+        },
+        {
+            category: 'LAVADO_ENGRASE',
+            label: 'Lavado y Engrase',
+            description: 'Limpieza y lubricación',
+            icon: <Droplets className="w-8 h-8" />,
+            color: 'bg-indigo-500/20 border-indigo-500 text-indigo-400',
         },
     ];
 
