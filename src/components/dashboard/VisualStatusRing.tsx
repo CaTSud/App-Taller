@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { calculateDaysUntil } from '@/lib/utils/date';
 import type { VehicleStatus } from '@/types/database';
@@ -53,10 +53,18 @@ export function VisualStatusRing({
     const offset = circumference - (healthScore / 100) * circumference;
 
     const color = useMemo(() => {
-        if (healthScore >= 80) return 'text-emerald-500';
-        if (healthScore >= 50) return 'text-amber-500';
-        return 'text-red-500';
+        if (healthScore >= 80) return 'text-status-ok';
+        if (healthScore >= 50) return 'text-status-warning';
+        return 'text-status-error';
     }, [healthScore]);
+
+    // Animation trigger
+    const [isAnimated, setIsAnimated] = useState(false);
+    useEffect(() => {
+        setIsAnimated(true);
+    }, []);
+
+    const currentOffset = isAnimated ? offset : circumference;
 
     return (
         <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
@@ -69,9 +77,9 @@ export function VisualStatusRing({
                     stroke="currentColor"
                     strokeWidth={strokeWidth}
                     fill="transparent"
-                    className="text-slate-800"
+                    className="text-slate-900"
                 />
-                {/* Progress Circle */}
+                {/* Progress Circle with draw-in animation */}
                 <circle
                     cx={center}
                     cy={center}
@@ -80,25 +88,32 @@ export function VisualStatusRing({
                     strokeWidth={strokeWidth}
                     fill="transparent"
                     strokeDasharray={circumference}
-                    strokeDashoffset={offset}
+                    strokeDashoffset={currentOffset}
                     strokeLinecap="round"
-                    className={cn("transition-all duration-1000 ease-out", color)}
+                    className={cn(
+                        "transition-all duration-1500 ease-in-out", 
+                        color,
+                        !isAnimated && "opacity-0"
+                    )}
                 />
             </svg>
 
-            <div className="flex flex-col items-center justify-center text-center z-10 p-4">
+            <div className={cn(
+                "flex flex-col items-center justify-center text-center z-10 p-4 transition-all duration-700",
+                isAnimated ? "opacity-100 scale-100" : "opacity-0 scale-90"
+            )}>
                 <span className={cn("text-4xl font-bold tracking-tighter mb-1", color)}>
                     {Math.round(healthScore)}%
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500">
+                <span className="text-[11px] uppercase font-bold tracking-widest text-slate-500">
                     Health Index
                 </span>
             </div>
 
-            {/* Subtle inner glow */}
+            {/* Breathing inner glow */}
             <div className={cn(
-                "absolute inset-[15%] rounded-full opacity-20 blur-2xl transition-all duration-700",
-                healthScore >= 80 ? "bg-emerald-500" : healthScore >= 50 ? "bg-amber-500" : "bg-red-500"
+                "absolute inset-[15%] rounded-full opacity-20 blur-3xl transition-all duration-1000 animate-pulse",
+                healthScore >= 80 ? "bg-status-ok" : healthScore >= 50 ? "bg-status-warning" : "bg-status-error"
             )} />
         </div>
     );

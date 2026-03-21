@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Cloud, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import { OilCanIcon } from '@/components/icons/OilCanIcon';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,12 +36,14 @@ export function StatusCard({ vehicleStatus, loading }: StatusCardProps) {
     }
 
     const lastUpdate = new Date(vehicleStatus.lastKmUpdate);
-    const formattedDate = lastUpdate.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    const formattedDate = useMemo(() => {
+        return lastUpdate.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }, [lastUpdate]);
 
     return (
         <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700">
@@ -101,38 +104,43 @@ interface TrafficLightCardProps {
     isKm?: boolean;
     currentKm?: number;
     icon: React.ReactNode;
+    shadowClass?: string;
 }
 
-function TrafficLightCard({ label, value, isKm = false, currentKm, icon }: TrafficLightCardProps) {
+function TrafficLightCard({ label, value, isKm = false, currentKm, icon, shadowClass }: TrafficLightCardProps) {
     const color = getTrafficLight(value, isKm, currentKm);
 
     const colorStyles = {
-        green: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-        yellow: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-        red: 'bg-red-500/10 border-red-500/20 text-red-400 animate-pulse',
+        green: 'bg-status-ok/10 border-status-ok/20 text-status-ok',
+        yellow: 'bg-status-warning/10 border-status-warning/20 text-status-warning',
+        red: 'bg-status-error/10 border-status-error/20 text-status-error animate-pulse',
     };
 
     const iconBg = {
-        green: 'bg-emerald-500/20',
-        yellow: 'bg-amber-500/20',
-        red: 'bg-red-500/20',
+        green: 'bg-status-ok/20',
+        yellow: 'bg-status-warning/20',
+        red: 'bg-status-error/20',
     };
 
     // Use the imported formatDateES function instead of local Date parsing
 
     return (
-        <Card className={cn('border transition-all duration-300 backdrop-blur-md rounded-2xl overflow-hidden', colorStyles[color])}>
+        <Card className={cn(
+            'border transition-all duration-300 backdrop-blur-md rounded-2xl overflow-hidden', 
+            colorStyles[color],
+            shadowClass
+        )}>
             <CardContent className="p-4 flex flex-col items-center">
                 <div className={cn('p-3 rounded-full mb-3', iconBg[color])}>
                     {icon}
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">{label}</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest opacity-80">{label}</p>
                 {value !== null && value !== undefined ? (
                     <div className="mt-2 text-center">
                         <p className="text-sm font-bold text-white tracking-tight">
                             {isKm ? `${(value as number).toLocaleString('es-ES')} KM` : formatDateES(value as string)}
                         </p>
-                        <p className="text-[9px] font-bold uppercase tracking-wider mt-1 opacity-80 text-slate-300">
+                        <p className="text-[11px] font-bold uppercase tracking-wider mt-2 opacity-90 text-slate-300">
                             {isKm && currentKm !== undefined ? (
                                 (value as number) - currentKm <= 0
                                     ? 'AGOTADO'
@@ -164,16 +172,19 @@ export function TrafficLightGrid({ vehicleStatus }: TrafficLightGridProps) {
                 label="ITV"
                 value={legalStatus?.next_itv_date || null}
                 icon={<CheckCircle2 className="w-8 h-8" />}
+                shadowClass="hover:shadow-legal"
             />
             <TrafficLightCard
                 label="Tacógrafo"
                 value={legalStatus?.next_tacho_date || null}
                 icon={<Clock className="w-8 h-8" />}
+                shadowClass="hover:shadow-legal"
             />
             <TrafficLightCard
                 label="ATP"
                 value={legalStatus?.next_atp_date || null}
                 icon={<AlertCircle className="w-8 h-8" />}
+                shadowClass="hover:shadow-legal"
             />
             <TrafficLightCard
                 label="Aceite"
@@ -181,6 +192,7 @@ export function TrafficLightGrid({ vehicleStatus }: TrafficLightGridProps) {
                 isKm={true}
                 currentKm={currentKm}
                 icon={<OilCanIcon className="w-8 h-8" />}
+                shadowClass="hover:shadow-mecanica"
             />
         </div>
     );

@@ -3,10 +3,25 @@
 import { useState, useEffect, useCallback, useOptimistic } from 'react';
 
 import { StatusCard, TrafficLightGrid, VehicleSelector, VisualStatusRing } from '@/components/dashboard';
-import { MaintenanceForm, MaintenanceGrid, MaintenanceHistorySheet } from '@/components/maintenance';
+import { MaintenanceGrid } from '@/components/maintenance';
+import dynamic from 'next/dynamic';
+
+const MaintenanceForm = dynamic(() => import('@/components/maintenance').then(mod => mod.MaintenanceForm), {
+  loading: () => null,
+  ssr: false
+});
+
+const MaintenanceHistorySheet = dynamic(() => import('@/components/maintenance').then(mod => mod.MaintenanceHistorySheet), {
+  loading: () => null,
+  ssr: false
+});
+
 import { getAvailablePlates, getVehicleStatus, getMaintenanceLogs, signOut, type MaintenanceLog } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { LogOut, CheckCircle2, History, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+import Image from 'next/image';
 
 import type { PlateOption, VehicleStatus, MaintenanceCategory } from '@/types/database';
 
@@ -46,8 +61,16 @@ export default function DashboardPage() {
     }
   );
 
+  const triggerHaptic = (style: 'light' | 'medium' | 'heavy' = 'light') => {
+    if (typeof window !== 'undefined' && window.navigator.vibrate) {
+      const patterns = { light: 10, medium: 20, heavy: 30 };
+      window.navigator.vibrate(patterns[style]);
+    }
+  };
+
   // Handle category selection from grid
   const handleCategorySelect = (category: MaintenanceCategory) => {
+    triggerHaptic('medium');
     setEditData(null); // Reset edit mode
     setSelectedCategory(category);
     setFormOpen(true);
@@ -131,11 +154,13 @@ export default function DashboardPage() {
 
         <div className="w-full max-w-md space-y-8 z-10 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col items-center pt-16">
           {/* Official Logo */}
-          <div className="w-48 h-48 mb-2 drop-shadow-2xl">
-            <img
+          <div className="relative w-48 h-48 mb-2 drop-shadow-2xl">
+            <Image
               src="/images/logo.png"
               alt="Logo App Taller"
-              className="w-full h-full object-contain rounded-3xl"
+              fill
+              priority
+              className="object-contain rounded-3xl"
             />
           </div>
 
@@ -198,7 +223,7 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-black text-white leading-none">
               {selectedPlate}
             </h2>
-            <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-1">
+            <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mt-1">
               Dashboard Principal
             </p>
           </div>
@@ -219,9 +244,23 @@ export default function DashboardPage() {
         <div className="relative">
           <VisualStatusRing vehicleStatus={vehicleStatus} size={240} strokeWidth={14} />
           {/* Status chip */}
-          <div className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-slate-900/80 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-md backdrop-blur-md">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            VIVO
+          <div className={cn(
+            "absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 px-2.5 py-1 rounded-full border shadow-md backdrop-blur-md flex items-center gap-1.5 transition-all duration-500",
+            statusLoading 
+              ? "bg-blue-500/10 text-blue-400 border-blue-500/30" 
+              : vehicleStatus 
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" 
+                : "bg-red-500/10 text-red-400 border-red-500/30"
+          )}>
+            <div className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              statusLoading && "bg-blue-400 animate-pulse",
+              !statusLoading && vehicleStatus && "bg-emerald-400 animate-[pulse_3s_infinite]",
+              !statusLoading && !vehicleStatus && "bg-red-400"
+            )} />
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              {statusLoading ? 'Sincronizando' : vehicleStatus ? 'En línea' : 'Sin conexión'}
+            </span>
           </div>
         </div>
 
@@ -229,7 +268,7 @@ export default function DashboardPage() {
         <div className="w-full mt-8 bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-sm backdrop-blur-sm">
           <div className="flex justify-between items-end">
             <div>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Kilometraje Actual</p>
+              <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500 shadow-sm">Kilometraje Actual</p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-4xl font-black text-white tabular-nums">
                   {vehicleStatus?.currentKm?.toLocaleString('es-ES') || '---'}
@@ -238,7 +277,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Sincronización</p>
+              <p className="text-[11px] uppercase font-bold tracking-widest text-slate-500">Sincronización</p>
               <p className="text-xs font-bold text-emerald-400 mt-1 flex items-center justify-end gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 CONECTADO
@@ -250,7 +289,7 @@ export default function DashboardPage() {
 
       {/* Maintenance Grid (Main Navigation) */}
       <section className="mb-6">
-        <h3 className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mb-4 px-2">
+        <h3 className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-4 px-2">
           Gestión de Mantenimientos
         </h3>
         <MaintenanceGrid onSelectCategory={handleCategorySelect} />
@@ -269,7 +308,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-left">
               <span className="block font-bold text-base tracking-tight leading-none">Historial de Registros</span>
-              <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-1">Revisa o edita tus entradas</span>
+              <span className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mt-1.5">Revisa o edita tus entradas</span>
             </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-blue-400">
@@ -280,7 +319,7 @@ export default function DashboardPage() {
 
       {/* Traffic Light Grid (Secondary Detail) */}
       <section className="mb-6 animate-in slide-in-from-bottom-4 duration-700 delay-200">
-        <h3 className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mb-4 px-2">
+        <h3 className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-4 px-2">
           Detalle de Expiraciones
         </h3>
         <TrafficLightGrid vehicleStatus={vehicleStatus} />

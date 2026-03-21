@@ -31,12 +31,12 @@ const categoryIcons: Record<string, React.ElementType> = {
 };
 
 const categoryColors: Record<string, string> = {
-    MECANICA: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-    NEUMATICOS: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-    LEGAL: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    FRIGO: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-    ACCIDENTE: 'text-red-400 bg-red-500/10 border-red-500/20',
-    LAVADO_ENGRASE: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+    MECANICA: 'text-mecanica bg-mecanica/10 border-mecanica/20',
+    NEUMATICOS: 'text-neumaticos bg-neumaticos/10 border-neumaticos/20',
+    LEGAL: 'text-legal bg-legal/10 border-legal/20',
+    FRIGO: 'text-frigo bg-frigo/10 border-frigo/20',
+    ACCIDENTE: 'text-accidente bg-accidente/10 border-accidente/20',
+    LAVADO_ENGRASE: 'text-lavado bg-lavado/10 border-lavado/20',
 };
 
 export function MaintenanceHistorySheet({ open, onOpenChange, plate, onEdit, externalLogs }: MaintenanceHistorySheetProps) {

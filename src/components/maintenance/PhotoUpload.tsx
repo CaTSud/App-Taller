@@ -95,10 +95,10 @@ export function PhotoUpload({ value, onChange, required }: PhotoUploadProps) {
                         type="button"
                         size="icon"
                         variant="destructive"
-                        className="absolute -top-2 -right-2 w-8 h-8 rounded-full"
+                        className="absolute -top-2 -right-2 w-10 h-10 rounded-full shadow-lg border-2 border-slate-950 flex items-center justify-center p-0"
                         onClick={handleRemove}
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-5 h-5 font-black" />
                     </Button>
                 </div>
             )}

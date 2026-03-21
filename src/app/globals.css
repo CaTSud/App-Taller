@@ -37,6 +37,20 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Maintenance Categories */
+  --color-mecanica: var(--mecanica);
+  --color-neumaticos: var(--neumaticos);
+  --color-legal: var(--legal);
+  --color-frigo: var(--frigo);
+  --color-accidente: var(--accidente);
+  --color-lavado: var(--lavado);
+
+  /* Status Colors */
+  --color-status-ok: var(--status-ok);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -44,6 +58,14 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Shadows */
+  --shadow-mecanica: var(--shadow-mecanica);
+  --shadow-neumaticos: var(--shadow-neumaticos);
+  --shadow-legal: var(--shadow-legal);
+  --shadow-frigo: var(--shadow-frigo);
+  --shadow-accidente: var(--shadow-accidente);
+  --shadow-lavado: var(--shadow-lavado);
 }
 
 :root {
@@ -79,6 +101,19 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Categories */
+  --mecanica: oklch(0.588 0.158 241.966);
+  --neumaticos: oklch(0.705 0.213 47.591);
+  --legal: oklch(0.687 0.187 154.449);
+  --frigo: oklch(0.722 0.149 202.933);
+  --accidente: oklch(0.637 0.237 25.331);
+  --lavado: oklch(0.585 0.233 277.117);
+
+  /* Status Colors */
+  --status-ok: oklch(0.687 0.187 154.449);
+  --status-warning: oklch(0.769 0.188 70.08);
+  --status-error: oklch(0.637 0.237 25.331);
 }
 
 .dark {
@@ -113,6 +148,27 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+
+  /* Categories (Dark - slightly more vibrant/saturated) */
+  --mecanica: oklch(0.65 0.2 250);
+  --neumaticos: oklch(0.75 0.2 50);
+  --legal: oklch(0.7 0.18 160);
+  --frigo: oklch(0.7 0.15 200);
+  --accidente: oklch(0.6 0.2 30);
+  --lavado: oklch(0.65 0.2 280);
+
+  /* Status Colors */
+  --status-ok: oklch(0.7 0.2 160);
+  --status-warning: oklch(0.75 0.2 70);
+  --status-error: oklch(0.6 0.2 30);
+
+  /* Glows & Shadows */
+  --shadow-mecanica: 0 0 30px -5px oklch(0.65 0.2 250 / 40%);
+  --shadow-neumaticos: 0 0 30px -5px oklch(0.75 0.2 50 / 40%);
+  --shadow-legal: 0 0 30px -5px oklch(0.7 0.18 160 / 40%);
+  --shadow-frigo: 0 0 30px -5px oklch(0.7 0.15 200 / 40%);
+  --shadow-accidente: 0 0 30px -5px oklch(0.6 0.2 30 / 40%);
+  --shadow-lavado: 0 0 30px -5px oklch(0.65 0.2 280 / 40%);
 }
 
 @layer base {

@@ -23,45 +23,45 @@ const categories: {
             label: 'Mecánica',
             description: 'Averías y filtros',
             icon: <Wrench className="w-8 h-8" />,
-            color: 'from-blue-500/10 to-blue-600/10 hover:from-blue-500/20 hover:to-blue-600/20 text-blue-400',
-            borderColor: 'border-blue-500/20 hover:border-blue-500/50',
-            glowColor: 'group-hover:bg-blue-500/20'
+            color: 'from-mecanica/10 to-mecanica/20 hover:from-mecanica/20 hover:to-mecanica/30 text-mecanica',
+            borderColor: 'border-mecanica/20 hover:border-mecanica/50',
+            glowColor: 'group-hover:bg-mecanica/20'
         },
         {
             id: 'NEUMATICOS',
             label: 'Neumáticos',
             description: 'Ruedas y llantas',
             icon: <WheelIcon className="w-8 h-8" />,
-            color: 'from-orange-500/10 to-orange-600/10 hover:from-orange-500/20 hover:to-orange-600/20 text-orange-400',
-            borderColor: 'border-orange-500/20 hover:border-orange-500/50',
-            glowColor: 'group-hover:bg-orange-500/20'
+            color: 'from-neumaticos/10 to-neumaticos/20 hover:from-neumaticos/20 hover:to-neumaticos/30 text-neumaticos',
+            borderColor: 'border-neumaticos/20 hover:border-neumaticos/50',
+            glowColor: 'group-hover:bg-neumaticos/20'
         },
         {
             id: 'LEGAL',
             label: 'ITV/Taco',
             description: 'Estado legal',
             icon: <Scale className="w-8 h-8" />,
-            color: 'from-emerald-500/10 to-emerald-600/10 hover:from-emerald-500/20 hover:to-emerald-600/20 text-emerald-400',
-            borderColor: 'border-emerald-500/20 hover:border-emerald-500/50',
-            glowColor: 'group-hover:bg-emerald-500/20'
+            color: 'from-legal/10 to-legal/20 hover:from-legal/20 hover:to-legal/30 text-legal',
+            borderColor: 'border-legal/20 hover:border-legal/50',
+            glowColor: 'group-hover:bg-legal/20'
         },
         {
             id: 'FRIGO',
             label: 'FRIGO',
             description: 'Equipo de frío',
             icon: <Snowflake className="w-8 h-8" />,
-            color: 'from-cyan-500/10 to-cyan-600/10 hover:from-cyan-500/20 hover:to-cyan-600/20 text-cyan-400',
-            borderColor: 'border-cyan-500/20 hover:border-cyan-500/50',
-            glowColor: 'group-hover:bg-cyan-500/20'
+            color: 'from-frigo/10 to-frigo/20 hover:from-frigo/20 hover:to-frigo/30 text-frigo',
+            borderColor: 'border-frigo/20 hover:border-frigo/50',
+            glowColor: 'group-hover:bg-frigo/20'
         },
         {
             id: 'LAVADO_ENGRASE',
             label: 'Lavado y Engrase',
             description: 'Limpieza y lubricación',
             icon: <Droplets className="w-8 h-8" />,
-            color: 'from-indigo-500/10 to-indigo-600/10 hover:from-indigo-500/20 hover:to-indigo-600/20 text-indigo-400',
-            borderColor: 'border-indigo-500/20 hover:border-indigo-500/50',
-            glowColor: 'group-hover:bg-indigo-500/20'
+            color: 'from-lavado/10 to-lavado/20 hover:from-lavado/20 hover:to-lavado/30 text-lavado',
+            borderColor: 'border-lavado/20 hover:border-lavado/50',
+            glowColor: 'group-hover:bg-lavado/20'
         }
     ];
 
@@ -78,7 +78,12 @@ export function MaintenanceGrid({ onSelectCategory }: MaintenanceGridProps) {
                         "bg-gradient-to-br",
                         cat.color,
                         cat.borderColor,
-                        "hover:-translate-y-1 hover:shadow-2xl active:scale-95"
+                        "hover:-translate-y-1 active:scale-95",
+                        cat.id === 'MECANICA' && 'hover:shadow-mecanica',
+                        cat.id === 'NEUMATICOS' && 'hover:shadow-neumaticos',
+                        cat.id === 'LEGAL' && 'hover:shadow-legal',
+                        cat.id === 'FRIGO' && 'hover:shadow-frigo',
+                        cat.id === 'LAVADO_ENGRASE' && 'hover:shadow-lavado'
                     )}
                 >
                     {/* Background Glow */}
@@ -95,7 +100,7 @@ export function MaintenanceGrid({ onSelectCategory }: MaintenanceGridProps) {
                         <span className="block font-bold text-lg tracking-tight">
                             {cat.label}
                         </span>
-                        <span className="block text-[10px] opacity-60 uppercase font-bold tracking-widest mt-1">
+                        <span className="block text-[11px] opacity-80 uppercase font-bold tracking-widest mt-1.5">
                             {cat.description}
                         </span>
                     </div>
